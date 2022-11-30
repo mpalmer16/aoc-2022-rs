@@ -1,0 +1,7 @@
+/target
+/Cargo.lock
+
+.session.cookie
+
+/*/inputs
+!/aoc-common/inputs/day_1.txt
