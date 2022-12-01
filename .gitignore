@@ -3,5 +3,10 @@
 
 .session.cookie
 
-/*/inputs
-!/aoc-common/inputs/day_1.txt
+# */inputs
+# aoc-common/day2
+# !/aoc-common/day1/inputs/day_1.txt
+# !/day1/inputs/test_input.txt
+
+/aoc-common/day2
+/day1/inputs/day_1.txt
