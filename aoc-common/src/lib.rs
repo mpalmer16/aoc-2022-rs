@@ -25,7 +25,7 @@ const YEAR: i32 = 2022;
 /// on something different is useful.
 ///
 /// # Example
-/// ```
+/// ```no_run
 /// # use crate::aoc_common::fetch;
 /// let input = fetch(1, "\n");
 ///
@@ -106,6 +106,7 @@ mod tests {
     use crate::{fetch, fetch_from_file, fetch_from_url};
 
     #[test]
+    #[ignore]
     fn can_fetch_input_from_file() {
         let input = fetch_from_file(1, "\n");
 
@@ -113,6 +114,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn can_fetch_input_from_url() {
         let input = fetch_from_url(1, "\n").unwrap();
 
@@ -120,6 +122,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn can_fetch_and_save_to_file() {
         let input = fetch(2, "\n");
 
