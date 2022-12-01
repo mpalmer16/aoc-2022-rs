@@ -7,7 +7,7 @@ use std::io::Write;
 
 use reqwest::{
     blocking::Client,
-    header::{HeaderMap, HeaderValue, COOKIE},
+    header::{HeaderMap, HeaderValue, COOKIE, USER_AGENT},
     redirect::Policy,
 };
 
@@ -19,42 +19,54 @@ const YEAR: i32 = 2022;
 /// subsequent calls will pull from this file.  If no file is found
 /// it will use the client.  This requires the .session.cookie file to be
 /// created, along with a valid cookie value it can read.
-/// 
-/// The second parameter is an initial split - the input is almost always
-/// delimited by '\n' but there are times when splitting the initial input
-/// on something different is useful.
+///
+/// The second parameter is an transform function defined as
+///     `Fn(String) -> Vec<String>`
 ///
 /// # Example
 /// ```no_run
-/// # use crate::aoc_common::fetch;
-/// let input = fetch(1, "\n");
+/// # use crate::aoc_common::fetch_with_transform;
+/// let transform = |s: String| {
+///     s.trim()
+///         .split('\n')
+///         .map(|s| s.to_string())
+///         .collect::<Vec<String>>()
+/// };
+///
+/// let input = fetch_with_transform(1, transform);
 ///
 /// assert!(input.len() == 10);
 /// ```
 ///
-pub fn fetch(day: i32, initial_split: &str) -> Vec<String> {
+pub fn fetch_with_transform<F>(day: i32, transform: F) -> Vec<String>
+where
+    F: Fn(String) -> Vec<String>,
+{
     if Path::new(&format!("day{}/inputs/day_{}.txt", day, day)).exists() {
-        fetch_from_file(day, initial_split)
+        fetch_from_file_with_transform(day, transform)
     } else {
-        match fetch_from_url(day, initial_split) {
+        match fetch_from_url_with_transform(day, transform) {
             Ok(content) => content,
             Err(e) => panic!("there was an error fetching content: {}", e),
         }
     }
 }
 
-fn fetch_from_file(day: i32, initial_split: &str) -> Vec<String> {
+fn fetch_from_file_with_transform<F>(day: i32, transform: F) -> Vec<String>
+where
+    F: Fn(String) -> Vec<String>,
+{
     let filename = format!("day{}/inputs/day_{}.txt", day, day);
     let Ok(content) = read_to_string(filename) else {
         panic!("could not read input file");
     };
-    content
-        .split(initial_split)
-        .map(|s| s.to_string())
-        .collect()
+    transform(content)
 }
 
-fn fetch_from_url(day: i32, initial_split: &str) -> Result<Vec<String>, String> {
+fn fetch_from_url_with_transform<F>(day: i32, transform: F) -> Result<Vec<String>, String>
+where
+    F: Fn(String) -> Vec<String>,
+{
     let url = format!("https://adventofcode.com/{}/day/{}/input", YEAR, day);
     let resp = build_client()?
         .get(url)
@@ -65,11 +77,7 @@ fn fetch_from_url(day: i32, initial_split: &str) -> Result<Vec<String>, String> 
     match resp {
         Ok(text) => {
             write_to_file(day, &text);
-            Ok(text
-                .trim()
-                .split(initial_split)
-                .map(|s| s.to_string())
-                .collect())
+            Ok(transform(text))
         }
         Err(e) => Err(e.to_string()),
     }
@@ -91,9 +99,14 @@ fn build_client() -> Result<Client, String> {
     let cookie_header = HeaderValue::from_str(&format!("session={}", session_cookie.trim()))
         .map_err(|e| format!("Invalid session cookie: {}", e))?;
 
+    let user_agent_header =
+        HeaderValue::from_str("github.com/mpalmer16/aoc-2022-rs by mpalmer1661@gmail.com")
+            .map_err(|e| format!("Invalid session cookie: {}", e))?;
+
     let mut headers = HeaderMap::new();
 
     headers.insert(COOKIE, cookie_header);
+    headers.insert(USER_AGENT, user_agent_header);
     Client::builder()
         .default_headers(headers)
         .redirect(Policy::none())
@@ -103,12 +116,20 @@ fn build_client() -> Result<Client, String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{fetch, fetch_from_file, fetch_from_url};
+    use crate::{
+        fetch_from_file_with_transform, fetch_from_url_with_transform, fetch_with_transform,
+    };
 
     #[test]
     #[ignore]
     fn can_fetch_input_from_file() {
-        let input = fetch_from_file(1, "\n");
+        let transform = |s: String| {
+            s.trim()
+                .split('\n')
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
+        };
+        let input = fetch_from_file_with_transform(1, transform);
 
         assert!(input.len() == 10);
     }
@@ -116,7 +137,13 @@ mod tests {
     #[test]
     #[ignore]
     fn can_fetch_input_from_url() {
-        let input = fetch_from_url(1, "\n").unwrap();
+        let transform = |s: String| {
+            s.trim()
+                .split('\n')
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
+        };
+        let input = fetch_from_url_with_transform(1, transform).unwrap();
 
         assert!(input.len() == 2253);
     }
@@ -124,7 +151,13 @@ mod tests {
     #[test]
     #[ignore]
     fn can_fetch_and_save_to_file() {
-        let input = fetch(2, "\n");
+        let transform = |s: String| {
+            s.trim()
+                .split('\n')
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
+        };
+        let input = fetch_with_transform(2, transform);
 
         assert!(input.len() == 1000);
     }

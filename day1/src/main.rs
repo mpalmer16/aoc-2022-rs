@@ -1,7 +1,14 @@
-use aoc_common::fetch;
+use aoc_common::fetch_with_transform;
 
 fn main() {
-    let input = fetch(1, "\n\n");
+    let transform = |s: String| {
+        s.trim()
+            .split("\n\n")
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>()
+    };
+
+    let input = fetch_with_transform(1, transform);
     let mut counts = get_elf_counts(input);
     counts.sort();
 
