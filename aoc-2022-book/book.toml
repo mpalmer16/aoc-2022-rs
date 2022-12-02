@@ -1,0 +1,6 @@
+[book]
+authors = ["Michael Palmer"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Advent of Code 2022"

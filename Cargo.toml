@@ -1,5 +1,6 @@
 [workspace]
 members = [
   "aoc-common",
-  "day1"
+  "day1",
+  "day2"
 ]
