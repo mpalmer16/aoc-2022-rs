@@ -1,79 +1,114 @@
 use aoc_common::fetch_with_transform;
 
+use crate::RPS::{Paper, Rock, Scissors};
+use crate::WLD::{Win, Lose, Draw};
+
 fn main() {
     let transform = |s: String| {
-        s.trim()
-            .split('\n')
+        s.split('\n')
             .map(|s| s.split(' ').collect::<Vec<&str>>())
             .map(|cs| {
                 assert!(cs.len() == 2);
-                (cs[0].to_string(), cs[1].to_string())
+                (RPS::read(cs[0]), RPS::read(cs[1]))
             })
-            .collect::<Vec<(String, String)>>()
+            .collect::<Vec<(RPS, RPS)>>()
     };
 
-    let input = fetch_with_transform(2, transform);
-
-    let scores = input.iter().map(get_score).collect::<Vec<i32>>();
-
-    println!("answer 1: {}", scores.iter().sum::<i32>());
-
-    let decrypted_input = input
+    let score = fetch_with_transform(2, transform)
         .iter()
-        .map(decrypt_round)
-        .collect::<Vec<(String, String)>>();
+        .map(get_score)
+        .sum::<i32>();
 
-    let scores = decrypted_input.iter().map(get_score).collect::<Vec<i32>>();
+    println!("answer 1: {}", score);
 
-    println!("answer 2: {}", scores.iter().sum::<i32>());
+    let transform = |s: String| {
+        s.split('\n')
+            .map(|s| s.split(' ').collect::<Vec<&str>>())
+            .map(|cs| {
+                assert!(cs.len() == 2);
+                (RPS::read(cs[0]), WLD::read(cs[1]))
+            })
+            .collect::<Vec<(RPS, WLD)>>()
+    };
+
+    let score = fetch_with_transform(2, transform)
+        .iter()
+        .map(|round| (round.0, round.1.convert(&round.0)))
+        .map(|round| get_score(&round))
+        .sum::<i32>();
+
+    println!("answer 2: {}", score);
 }
 
-fn get_score_for_shape(shape: &str) -> i32 {
-    match shape {
-        "X" => 1,
-        "Y" => 2,
-        "Z" => 3,
-        _ => 0,
+fn get_score_for_shape(round: &(RPS, RPS)) -> i32 {
+    match round.1 {
+        Rock => 1,
+        Paper => 2,
+        Scissors => 3,
     }
 }
 
-fn get_score_for_outcome(round: (&str, &str)) -> i32 {
+fn get_score_for_outcome(round: &(RPS, RPS)) -> i32 {
     match round {
-        ("A", "X") | ("B", "Y") | ("C", "Z") => 3, // draw
-        ("A", "Z") | ("C", "Y") | ("B", "X") => 0, // loss
-        ("C", "X") | ("B", "Z") | ("A", "Y") => 6,
-        _ => panic!("invalid input"),
+        (Scissors, Rock) | (Paper, Scissors) | (Rock, Paper) => 6,
+        (Rock, Rock) | (Paper, Paper) | (Scissors, Scissors) => 3,
+        (Rock, Scissors) | (Scissors, Paper) | (Paper, Rock) => 0,
     }
 }
 
-fn get_score(round: &(String, String)) -> i32 {
-    let score_for_shape = get_score_for_shape(round.1.as_str());
-    let score_for_outcome = get_score_for_outcome((round.0.as_str(), round.1.as_str()));
-
-    score_for_shape + score_for_outcome
+fn get_score(round: &(RPS, RPS)) -> i32 {
+    get_score_for_shape(round) + get_score_for_outcome(round)
 }
 
-fn decrypt_round(round: &(String, String)) -> (String, String) {
-    match round.1.as_str() {
-        "X" => match round.0.as_str() {
-            "A" => (round.0.to_string(), "Z".to_string()),
-            "B" => (round.0.to_string(), "X".to_string()),
-            "C" => (round.0.to_string(), "Y".to_string()),
+#[derive(PartialEq, Clone, Copy)]
+enum RPS {
+    Rock,
+    Paper,
+    Scissors,
+}
+
+impl RPS {
+    fn read(c: &str) -> Self {
+        match c {
+            "A" | "X" => Rock,
+            "B" | "Y" => Paper,
+            "C" | "Z" => Scissors,
             _ => panic!("invalid input"),
-        },
-        "Y" => match round.0.as_str() {
-            "A" => (round.0.to_string(), "X".to_string()),
-            "B" => (round.0.to_string(), "Y".to_string()),
-            "C" => (round.0.to_string(), "Z".to_string()),
+        }
+    }
+}
+
+#[derive(PartialEq)]
+enum WLD {
+    Win,
+    Lose,
+    Draw,
+}
+
+impl WLD {
+    fn read(c: &str) -> Self {
+        match c {
+            "X" => Lose,
+            "Y" => Draw,
+            "Z" => Win,
             _ => panic!("invalid input"),
-        },
-        "Z" => match round.0.as_str() {
-            "A" => (round.0.to_string(), "Y".to_string()),
-            "B" => (round.0.to_string(), "Z".to_string()),
-            "C" => (round.0.to_string(), "X".to_string()),
-            _ => panic!("invalid input"),
-        },
-        _ => panic!("invalid input"),
+        }
+    }
+
+    fn convert(&self, other: &RPS) -> RPS {
+        match self {
+            Self::Lose => match other {
+                Rock => Scissors,
+                Paper => Rock,
+                Scissors => Paper,
+            },
+            Self::Draw => *other,
+            Self::Win => match other {
+                Rock => Paper,
+                Paper => Scissors,
+                Scissors => Rock,
+            },
+        }
     }
 }
 
@@ -81,38 +116,49 @@ fn decrypt_round(round: &(String, String)) -> (String, String) {
 mod tests {
     use aoc_common::get_test_input;
 
-    use crate::{decrypt_round, get_score};
+    use crate::{
+        get_score,
+        RPS::{self, Paper, Rock, Scissors},
+        WLD::{self, Draw, Lose, Win},
+    };
 
     const TEST_INPUT_FILE: &str = "inputs/test_input.txt";
 
-    fn test_transform(s: String) -> Vec<(String, String)> {
+    fn test_transform_rps(s: String) -> Vec<(RPS, RPS)> {
         s.split('\n')
             .map(|s| s.split(' ').collect::<Vec<&str>>())
             .map(|cs| {
                 assert!(cs.len() == 2);
-                (cs[0].to_string(), cs[1].to_string())
+                (RPS::read(cs[0]), RPS::read(cs[1]))
             })
-            .collect::<Vec<(String, String)>>()
+            .collect::<Vec<(RPS, RPS)>>()
+    }
+
+    fn test_transform_wld(s: String) -> Vec<(RPS, WLD)> {
+        s.split('\n')
+            .map(|s| s.split(' ').collect::<Vec<&str>>())
+            .map(|v| {
+                assert!(v.len() == 2);
+                (RPS::read(v[0]), WLD::read(v[1]))
+            })
+            .collect::<Vec<(RPS, WLD)>>()
     }
 
     #[test]
-    fn can_get_input() {
-        let input = get_test_input(TEST_INPUT_FILE, test_transform);
+    fn can_read_rps_input() {
+        let input: Vec<(RPS, RPS)> = get_test_input(TEST_INPUT_FILE, test_transform_rps);
+        assert!(input == vec![(Rock, Paper), (Paper, Rock), (Scissors, Scissors)])
+    }
 
-        assert!(
-            input
-                == vec![
-                    (String::from("A"), String::from("Y")),
-                    (String::from("B"), String::from("X")),
-                    (String::from("C"), String::from("Z"))
-                ]
-        );
+    #[test]
+    fn can_read_wld_input() {
+        let input: Vec<(RPS, WLD)> = get_test_input(TEST_INPUT_FILE, test_transform_wld);
+        assert!(input == vec![(Rock, Draw), (Paper, Lose), (Scissors, Win)]);
     }
 
     #[test]
     fn can_get_scores() {
-        let input = get_test_input(TEST_INPUT_FILE, test_transform);
-
+        let input: Vec<(RPS, RPS)> = get_test_input(TEST_INPUT_FILE, test_transform_rps);
         let scores = input.iter().map(get_score).collect::<Vec<i32>>();
 
         assert!(scores == vec![8, 1, 6]);
@@ -120,21 +166,16 @@ mod tests {
     }
 
     #[test]
-    fn can_decrypt_rounds() {
-        let input = get_test_input(TEST_INPUT_FILE, test_transform);
+    fn can_decrypt_rounds_with_wld_to_rps() {
+        let input: Vec<(RPS, WLD)> = get_test_input(TEST_INPUT_FILE, test_transform_wld);
 
-        let decrypted_rounds = input
+        let scores = input
             .iter()
-            .map(decrypt_round)
-            .collect::<Vec<(String, String)>>();
+            .map(|round| (round.0, round.1.convert(&round.0)))
+            .map(|round| get_score(&round))
+            .collect::<Vec<i32>>();
 
-        assert!(
-            decrypted_rounds
-                == vec![
-                    (String::from("A"), String::from("X")),
-                    (String::from("B"), String::from("X")),
-                    (String::from("C"), String::from("X"))
-                ]
-        );
+        assert!(scores == vec![4, 1, 7]);
+        assert!(scores.iter().sum::<i32>() == 12);
     }
 }
