@@ -30,3 +30,36 @@ The fifth Elf is carrying one food item with 10000 Calories.
 In case the Elves get hungry and need extra snacks, they need to know which Elf to ask: they'd like to know how many Calories are being carried by the Elf carrying the most Calories. In the example above, this is 24000 (carried by the fourth Elf).
 
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
+
+---
+
+Define a transform to read the input text into a vector of strings, splitting on a double newline
+```rust
+let transform: Vec<String> = |s: String| {
+        s.trim()
+            .split("\n\n")
+            .map(|s| s.to_string())
+            .collect()
+    };
+```
+Define a function that can take a vector of strings, then split each string on the newline separator, parse the strings to ints, and sum the values for each,
+this will return a new vector of ints
+```rust
+fn get_elf_counts(elf_strings: Vec<String>) -> Vec<i32> {
+    elf_strings
+        .iter()
+        .map(|s| {
+            s.split('\n')
+                .map(|s| s.parse::<i32>().expect("could not parse int"))
+                .sum::<i32>()
+        })
+        .collect()
+}
+```
+fetch the input and get the counts, then sort the vector in place - the last value is the largest number
+```rust
+let input = fetch_with_transform(1, transform);
+let mut counts: Vec<i32> = get_elf_counts(input);
+counts.sort();
+let answer: i32 = counts.last().unwrap()
+```

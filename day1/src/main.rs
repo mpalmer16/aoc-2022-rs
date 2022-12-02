@@ -28,7 +28,7 @@ fn get_elf_counts(elf_strings: Vec<String>) -> Vec<i32> {
                 .map(|s| s.parse::<i32>().expect("could not parse int"))
                 .sum::<i32>()
         })
-        .collect::<Vec<i32>>()
+        .collect()
 }
 
 #[cfg(test)]
