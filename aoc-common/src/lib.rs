@@ -21,10 +21,10 @@ const YEAR: i32 = 2022;
 /// created, along with a valid cookie value it can read.
 ///
 /// The second parameter is an transform function defined as
-///     `Fn(String) -> Vec<String>`
+///     `Fn(String) -> Vec<T>`
 ///
 /// # Example
-/// ```no_run
+/// ```ignore
 /// # use crate::aoc_common::fetch_with_transform;
 /// let transform = |s: String| {
 ///     s.trim()
@@ -38,9 +38,9 @@ const YEAR: i32 = 2022;
 /// assert!(input.len() == 10);
 /// ```
 ///
-pub fn fetch_with_transform<F>(day: i32, transform: F) -> Vec<String>
+pub fn fetch_with_transform<F, T>(day: i32, transform: F) -> Vec<T>
 where
-    F: Fn(String) -> Vec<String>,
+    F: Fn(String) -> Vec<T>,
 {
     if Path::new(&format!("day{}/inputs/day_{}.txt", day, day)).exists() {
         fetch_from_file_with_transform(day, transform)
@@ -52,9 +52,19 @@ where
     }
 }
 
-fn fetch_from_file_with_transform<F>(day: i32, transform: F) -> Vec<String>
+/// Reads an input file from `input/test_input.txt` that contains the test data.
+/// For use in unit tests (helper function)
+pub fn get_test_input<F, T>(filename: &str, transform: F) -> Vec<T>
 where
-    F: Fn(String) -> Vec<String>,
+    F: Fn(String) -> Vec<T>,
+{
+    let content = read_to_string(filename).expect("can not read test input file");
+    transform(content)
+}
+
+fn fetch_from_file_with_transform<F, T>(day: i32, transform: F) -> Vec<T>
+where
+    F: Fn(String) -> Vec<T>,
 {
     let filename = format!("day{}/inputs/day_{}.txt", day, day);
     let Ok(content) = read_to_string(filename) else {
@@ -63,9 +73,9 @@ where
     transform(content)
 }
 
-fn fetch_from_url_with_transform<F>(day: i32, transform: F) -> Result<Vec<String>, String>
+fn fetch_from_url_with_transform<F, T>(day: i32, transform: F) -> Result<Vec<T>, String>
 where
-    F: Fn(String) -> Vec<String>,
+    F: Fn(String) -> Vec<T>,
 {
     let url = format!("https://adventofcode.com/{}/day/{}/input", YEAR, day);
     let resp = build_client()?
@@ -118,6 +128,7 @@ fn build_client() -> Result<Client, String> {
 mod tests {
     use crate::{
         fetch_from_file_with_transform, fetch_from_url_with_transform, fetch_with_transform,
+        get_test_input,
     };
 
     #[test]
@@ -160,5 +171,18 @@ mod tests {
         let input = fetch_with_transform(2, transform);
 
         assert!(input.len() == 1000);
+    }
+
+    #[test]
+    fn can_read_test_input() {
+        let transform = |s: String| {
+            s.split('\n')
+                .map(|s| s.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>()
+        };
+
+        let input = get_test_input("inputs/test_input.txt", transform);
+
+        assert!(input.len() == 5);
     }
 }
