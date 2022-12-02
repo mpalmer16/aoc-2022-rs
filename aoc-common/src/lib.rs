@@ -52,6 +52,16 @@ where
     }
 }
 
+/// Reads an input file from `input/test_input.txt` that contains the test data.
+/// For use in unit tests (helper function)
+pub fn get_test_input<F, T>(filename: &str, transform: F) -> Vec<T>
+where
+    F: Fn(String) -> Vec<T>,
+{
+    let content = read_to_string(filename).expect("can not read test input file");
+    transform(content)
+}
+
 fn fetch_from_file_with_transform<F, T>(day: i32, transform: F) -> Vec<T>
 where
     F: Fn(String) -> Vec<T>,
@@ -118,6 +128,7 @@ fn build_client() -> Result<Client, String> {
 mod tests {
     use crate::{
         fetch_from_file_with_transform, fetch_from_url_with_transform, fetch_with_transform,
+        get_test_input,
     };
 
     #[test]
@@ -160,5 +171,18 @@ mod tests {
         let input = fetch_with_transform(2, transform);
 
         assert!(input.len() == 1000);
+    }
+
+    #[test]
+    fn can_read_test_input() {
+        let transform = |s: String| {
+            s.split('\n')
+                .map(|s| s.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>()
+        };
+
+        let input = get_test_input("inputs/test_input.txt", transform);
+
+        assert!(input.len() == 5);
     }
 }
