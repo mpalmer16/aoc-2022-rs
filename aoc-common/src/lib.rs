@@ -111,7 +111,7 @@ fn build_client() -> Result<Client, String> {
 
     let user_agent_header =
         HeaderValue::from_str("github.com/mpalmer16/aoc-2022-rs by mpalmer1661@gmail.com")
-            .map_err(|e| format!("Invalid session cookie: {}", e))?;
+            .map_err(|e| format!("Invalid user agent: {}", e))?;
 
     let mut headers = HeaderMap::new();
 
