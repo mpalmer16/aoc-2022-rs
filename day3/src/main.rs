@@ -15,8 +15,7 @@ fn main() {
             .collect()
     });
     let shared_items: Vec<char> = input.iter().map(diff).collect();
-    let priorities: Vec<usize> = shared_items.iter().map(priority).collect();
-    let priority_sum: usize = priorities.iter().sum();
+    let priority_sum = shared_items.iter().map(priority).sum::<usize>();
 
     println!("answer 1: {}", priority_sum);
 
@@ -33,12 +32,11 @@ fn main() {
         out_vec
     });
 
-    let duplicates = input
+    let priority_sum = input
         .iter()
         .map(|s| find_duplicates(s))
-        .collect::<Vec<char>>();
-
-    let priority_sum = duplicates.iter().map(priority).sum::<usize>();
+        .map(|c| priority(&c))
+        .sum::<usize>();
 
     println!("answer 2: {}", priority_sum)
 }
