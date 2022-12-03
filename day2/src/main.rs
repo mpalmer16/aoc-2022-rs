@@ -1,7 +1,7 @@
 use aoc_common::fetch_with_transform;
 
 use crate::RPS::{Paper, Rock, Scissors};
-use crate::WLD::{Win, Lose, Draw};
+use crate::WLD::{Draw, Lose, Win};
 
 fn main() {
     let transform = |s: String| {
