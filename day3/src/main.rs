@@ -3,7 +3,7 @@ use std::ops::RangeInclusive;
 use aoc_common::fetch_with_transform;
 
 fn main() {
-    let input: Vec<(Vec<char>, Vec<char>)> = fetch_with_transform(3, |s| {
+    let rucksacks: Vec<(Vec<char>, Vec<char>)> = fetch_with_transform(3, |s| {
         s.split('\n')
             .map(|s| {
                 let half = s.len() / 2;
@@ -14,12 +14,15 @@ fn main() {
             })
             .collect()
     });
-    let shared_items: Vec<char> = input.iter().map(diff).collect();
-    let priority_sum = shared_items.iter().map(priority).sum::<usize>();
+    let priority_sum: usize = rucksacks
+        .iter()
+        .map(diff)
+        .map(|c| priority(&c))
+        .sum::<usize>();
 
     println!("answer 1: {}", priority_sum);
 
-    let input: Vec<Vec<String>> = fetch_with_transform(3, |s| {
+    let elf_groups: Vec<Vec<String>> = fetch_with_transform(3, |s| {
         let strings: Vec<String> = s.split('\n').map(|s| s.to_string()).collect();
         let mut out_vec: Vec<Vec<String>> = vec![];
         for chunk in strings.chunks_exact(3) {
@@ -32,9 +35,9 @@ fn main() {
         out_vec
     });
 
-    let priority_sum = input
+    let priority_sum = elf_groups
         .iter()
-        .map(|s| find_duplicates(s))
+        .map(|s| find_badge(s))
         .map(|c| priority(&c))
         .sum::<usize>();
 
@@ -67,7 +70,7 @@ fn priority(c: &char) -> usize {
     panic!("not a valid item!");
 }
 
-fn find_duplicates(s: &[String]) -> char {
+fn find_badge(s: &[String]) -> char {
     assert!(s.len() == 3, "not grouped by 3!");
 
     let first = s.get(0).unwrap();
@@ -86,9 +89,11 @@ fn find_duplicates(s: &[String]) -> char {
 mod tests {
     use aoc_common::get_test_input;
 
-    use crate::{diff, find_duplicates, priority};
+    use crate::{diff, find_badge, priority};
 
-    fn test_transform(s: String) -> Vec<(Vec<char>, Vec<char>)> {
+    const TEST_FILE: &str = "inputs/test_input.txt";
+
+    fn create_rucksack_compartments(s: String) -> Vec<(Vec<char>, Vec<char>)> {
         s.split('\n')
             .map(|s| {
                 let half = s.len() / 2;
@@ -100,7 +105,7 @@ mod tests {
             .collect()
     }
 
-    fn test_transform_strings(s: String) -> Vec<Vec<String>> {
+    fn create_elf_groups(s: String) -> Vec<Vec<String>> {
         let strings: Vec<String> = s.split('\n').map(|s| s.to_string()).collect();
         let mut out_vec: Vec<Vec<String>> = vec![];
         for chunk in strings.chunks_exact(3) {
@@ -115,14 +120,14 @@ mod tests {
 
     #[test]
     fn can_get_input() {
-        let input = get_test_input("inputs/test_input.txt", test_transform);
+        let input = get_test_input(TEST_FILE, create_rucksack_compartments);
 
         assert!(input.len() == 6);
     }
 
     #[test]
     fn can_diff_compartments() {
-        let input = get_test_input("inputs/test_input.txt", test_transform);
+        let input = get_test_input(TEST_FILE, create_rucksack_compartments);
         let shared_items = input.iter().map(diff).collect::<Vec<char>>();
 
         assert!(shared_items == vec!['p', 'L', 'P', 'v', 't', 's']);
@@ -130,7 +135,7 @@ mod tests {
 
     #[test]
     fn can_get_priority() {
-        let input = get_test_input("inputs/test_input.txt", test_transform);
+        let input = get_test_input(TEST_FILE, create_rucksack_compartments);
         let shared_items = input.iter().map(diff).collect::<Vec<char>>();
         let priorities = shared_items.iter().map(priority).collect::<Vec<usize>>();
 
@@ -139,17 +144,17 @@ mod tests {
     }
 
     #[test]
-    fn can_find_duplicates() {
-        let input = get_test_input("inputs/test_input.txt", test_transform_strings);
+    fn can_find_badges() {
+        let elf_groups = get_test_input(TEST_FILE, create_elf_groups);
 
-        let duplicates = input
+        let badges = elf_groups
             .iter()
-            .map(|s| find_duplicates(s))
+            .map(|s| find_badge(s))
             .collect::<Vec<char>>();
 
-        assert!(duplicates == vec!['r', 'Z']);
+        assert!(badges == vec!['r', 'Z']);
 
-        let priority_sum = duplicates.iter().map(priority).sum::<usize>();
+        let priority_sum = badges.iter().map(priority).sum::<usize>();
 
         assert!(priority_sum == 70);
     }
