@@ -127,17 +127,21 @@ mod tests {
 
     #[test]
     fn can_diff_compartments() {
-        let input = get_test_input(TEST_FILE, create_rucksack_compartments);
-        let shared_items = input.iter().map(diff).collect::<Vec<char>>();
+        let shared_items: Vec<char> = get_test_input(TEST_FILE, create_rucksack_compartments)
+            .iter()
+            .map(diff)
+            .collect();
 
         assert!(shared_items == vec!['p', 'L', 'P', 'v', 't', 's']);
     }
 
     #[test]
     fn can_get_priority() {
-        let input = get_test_input(TEST_FILE, create_rucksack_compartments);
-        let shared_items = input.iter().map(diff).collect::<Vec<char>>();
-        let priorities = shared_items.iter().map(priority).collect::<Vec<usize>>();
+        let priorities: Vec<usize> = get_test_input(TEST_FILE, create_rucksack_compartments)
+            .iter()
+            .map(diff)
+            .map(|c| priority(&c))
+            .collect();
 
         assert!(priorities == vec![16, 38, 42, 22, 20, 19]);
         assert!(priorities.iter().sum::<usize>() == 157);
@@ -145,12 +149,10 @@ mod tests {
 
     #[test]
     fn can_find_badges() {
-        let elf_groups = get_test_input(TEST_FILE, create_elf_groups);
-
-        let badges = elf_groups
+        let badges: Vec<char> = get_test_input(TEST_FILE, create_elf_groups)
             .iter()
             .map(|s| find_badge(s))
-            .collect::<Vec<char>>();
+            .collect();
 
         assert!(badges == vec!['r', 'Z']);
 
