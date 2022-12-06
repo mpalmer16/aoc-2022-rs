@@ -38,9 +38,9 @@ const YEAR: i32 = 2022;
 /// assert!(input.len() == 10);
 /// ```
 ///
-pub fn fetch_with_transform<F, T>(day: i32, transform: F) -> Vec<T>
+pub fn fetch_with_transform<F, T>(day: i32, transform: F) -> T
 where
-    F: Fn(String) -> Vec<T>,
+    F: Fn(String) -> T,
 {
     if Path::new(&format!("day{}/inputs/day_{}.txt", day, day)).exists() {
         fetch_from_file_with_transform(day, transform)
@@ -54,17 +54,17 @@ where
 
 /// Reads an input file from `input/test_input.txt` that contains the test data.
 /// For use in unit tests (helper function)
-pub fn get_test_input<F, T>(filename: &str, transform: F) -> Vec<T>
+pub fn get_test_input<F, T>(filename: &str, transform: F) -> T
 where
-    F: Fn(String) -> Vec<T>,
+    F: Fn(String) -> T,
 {
     let content = read_to_string(filename).expect("can not read test input file");
     transform(content)
 }
 
-fn fetch_from_file_with_transform<F, T>(day: i32, transform: F) -> Vec<T>
+fn fetch_from_file_with_transform<F, T>(day: i32, transform: F) -> T
 where
-    F: Fn(String) -> Vec<T>,
+    F: Fn(String) -> T,
 {
     let filename = format!("day{}/inputs/day_{}.txt", day, day);
     let Ok(content) = read_to_string(filename) else {
@@ -73,9 +73,9 @@ where
     transform(content)
 }
 
-fn fetch_from_url_with_transform<F, T>(day: i32, transform: F) -> Result<Vec<T>, String>
+fn fetch_from_url_with_transform<F, T>(day: i32, transform: F) -> Result<T, String>
 where
-    F: Fn(String) -> Vec<T>,
+    F: Fn(String) -> T,
 {
     let url = format!("https://adventofcode.com/{}/day/{}/input", YEAR, day);
     let resp = build_client()?
