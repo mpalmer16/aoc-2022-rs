@@ -19,7 +19,7 @@ fn find_marker(s: &str, size: usize) -> (String, i32) {
         marker = format!("{}{}", marker, c);
         if marker.len() == size {
             if is_unique(&marker) {
-                break
+                break;
             } else {
                 marker = marker.chars().collect::<Vec<char>>()[1..].iter().collect();
             }
@@ -33,12 +33,12 @@ fn is_unique(s: &str) -> bool {
     let mut letters: Vec<char> = vec![];
     for c in s.chars() {
         if letters.contains(&c) {
-            return false
+            return false;
         } else {
             letters.push(c);
         }
     }
-    true 
+    true
 }
 
 #[cfg(test)]
