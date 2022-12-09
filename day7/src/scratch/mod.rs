@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub fn apply_command(directory: &mut Directory, command: &Command) {
     match command {
         Command::LS(files) => {
@@ -12,6 +13,7 @@ pub fn apply_command(directory: &mut Directory, command: &Command) {
     }
 }
 
+#[allow(dead_code)]
 pub fn apply_command_to_directories(
     directories: &mut Vec<Directory>,
     command: &Command,
@@ -36,13 +38,13 @@ pub fn apply_command_to_directories(
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Directory {
     pub name: String,
     pub directories: Vec<String>,
     pub files: Vec<(i32, String)>,
 }
-
+#[allow(dead_code)]
 impl Directory {
     pub fn new(name: &str) -> Self {
         Self {
@@ -69,25 +71,25 @@ impl Directory {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Command {
     CD(String),
     LS(Vec<FileType>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FileType {
     Dir(String),
     File((i32, String)),
 }
-
+#[allow(dead_code)]
 pub fn transform(s: String) -> Vec<String> {
     s.split("$ ")
         .map(|s| s.to_string())
         .filter(|s| !s.is_empty())
         .collect::<Vec<String>>()
 }
-
+#[allow(dead_code)]
 pub fn parse_command(s: String) -> Command {
     let parts = s
         .split('\n')

@@ -18,7 +18,7 @@ use crate::scratch::{apply_command, apply_command_to_directories, transform, Dir
 
 /// needed help on this one - see [this answer](https://fasterthanli.me/series/advent-of-code-2022/part-7) for more!
 fn main() {
-    let lines = include_str!("../inputs/day_7.txt")
+    let lines = include_str!("../inputs/test_input.txt") // change this to be real input as needed
         .lines()
         .map(|l| all_consuming(parse_line)(l).finish().unwrap().1);
 
@@ -204,7 +204,7 @@ fn all_dirs(n: NodeHandle) -> Box<dyn Iterator<Item = NodeHandle>> {
     let children = n.borrow().children.values().cloned().collect::<Vec<_>>();
 
     Box::new(
-        std::iter::once(n.clone()).chain(
+        std::iter::once(n).chain(
             children
                 .into_iter()
                 .filter_map(|c| {
