@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub fn find_position_of(map: &[Vec<i32>], n: i32) -> (usize, usize) {
+pub fn _find_position_of(map: &[Vec<i32>], n: i32) -> (usize, usize) {
     for (x, row) in map.iter().enumerate() {
         for (y, col) in row.iter().enumerate() {
             if *col == n {
@@ -11,37 +11,37 @@ pub fn find_position_of(map: &[Vec<i32>], n: i32) -> (usize, usize) {
     panic!("position not found!")
 }
 
-pub fn elevations(s: String) -> Vec<Vec<i32>> {
+pub fn _elevations(s: String) -> Vec<Vec<i32>> {
     let elevation_lookup: HashMap<char, i32> =
         ('a'..='z').zip(1..=26).collect::<HashMap<char, i32>>();
     s.split('\n')
         .map(|line| {
             line.split("")
                 .filter(|&c| !c.is_empty())
-                .map(|c| parse_elevation(c, &elevation_lookup))
+                .map(|c| _parse_elevation(c, &elevation_lookup))
                 .collect::<Vec<i32>>()
         })
         .collect::<Vec<Vec<i32>>>()
 }
 
-pub fn find_paths(
+pub fn _find_paths(
     (x, y): (usize, usize),
     map: &Vec<Vec<i32>>,
     points: &[(usize, usize)],
 ) -> Vec<Vec<(usize, usize)>> {
     let ps = vec![points.to_owned(), vec![(x, y)]].concat();
-    let next_moves = get_next_moves((x, y), map, &ps);
+    let next_moves = _get_next_moves((x, y), map, &ps);
     if next_moves.is_empty() {
         vec![ps.to_vec()]
     } else {
         next_moves
             .iter()
-            .flat_map(|&m| find_paths(m, map, &ps))
+            .flat_map(|&m| _find_paths(m, map, &ps))
             .collect::<Vec<_>>()
     }
 }
 
-fn parse_elevation(s: &str, elevation_lookup: &HashMap<char, i32>) -> i32 {
+fn _parse_elevation(s: &str, elevation_lookup: &HashMap<char, i32>) -> i32 {
     let chars = s.chars().collect::<Vec<char>>();
     let c = chars.first().expect("single char not found");
     match c {
@@ -51,21 +51,21 @@ fn parse_elevation(s: &str, elevation_lookup: &HashMap<char, i32>) -> i32 {
     }
 }
 
-fn get_next_moves(
+fn _get_next_moves(
     (x, y): (usize, usize),
     map: &[Vec<i32>],
     visited: &[(usize, usize)],
 ) -> Vec<(usize, usize)> {
     if map[x][y] == 27 {
         vec![]
-    } else if is_on_edge((x, y), map) {
+    } else if _is_on_edge((x, y), map) {
         match (x, y) {
-            (0, 0) => filter_available(vec![(x + 1, y), (x, y + 1)], (x, y), map, visited),
+            (0, 0) => _filter_available(vec![(x + 1, y), (x, y + 1)], (x, y), map, visited),
             (x, 0) => {
                 if x == map.len() - 1 {
-                    filter_available(vec![(x - 1, y), (x, y + 1)], (x, y), map, visited)
+                    _filter_available(vec![(x - 1, y), (x, y + 1)], (x, y), map, visited)
                 } else {
-                    filter_available(
+                    _filter_available(
                         vec![(x + 1, y), (x - 1, y), (x, y + 1)],
                         (x, y),
                         map,
@@ -75,9 +75,9 @@ fn get_next_moves(
             }
             (0, y) => {
                 if y == map[x].len() - 1 {
-                    filter_available(vec![(x + 1, y - 1), (x, y - 1)], (x, y), map, visited)
+                    _filter_available(vec![(x + 1, y - 1), (x, y - 1)], (x, y), map, visited)
                 } else {
-                    filter_available(
+                    _filter_available(
                         vec![(x, y + 1), (x, y - 1), (x + 1, y)],
                         (x, y),
                         map,
@@ -87,9 +87,9 @@ fn get_next_moves(
             }
             (x, y) => {
                 if x == map.len() - 1 && y == map[x].len() - 1 {
-                    filter_available(vec![(x - 1, y), (x, y - 1)], (x, y), map, visited)
+                    _filter_available(vec![(x - 1, y), (x, y - 1)], (x, y), map, visited)
                 } else if x == map.len() - 1 {
-                    filter_available(
+                    _filter_available(
                         vec![(x - 1, y), (x, y - 1), (x, y + 1)],
                         (x, y),
                         map,
@@ -97,7 +97,7 @@ fn get_next_moves(
                     )
                 } else {
                     //if y == map[x].len() {
-                    filter_available(
+                    _filter_available(
                         vec![(x - 1, y), (x + 1, y), (x, y - 1)],
                         (x, y),
                         map,
@@ -107,7 +107,7 @@ fn get_next_moves(
             }
         }
     } else {
-        filter_available(
+        _filter_available(
             vec![(x, y + 1), (x, y - 1), (x + 1, y), (x - 1, y)],
             (x, y),
             map,
@@ -116,11 +116,11 @@ fn get_next_moves(
     }
 }
 
-fn is_on_edge((x, y): (usize, usize), map: &[Vec<i32>]) -> bool {
+fn _is_on_edge((x, y): (usize, usize), map: &[Vec<i32>]) -> bool {
     x == 0 || y == 0 || x == map.len() - 1 || y == map[x].len() - 1
 }
 
-fn filter_available(
+fn _filter_available(
     compares: Vec<(usize, usize)>,
     point: (usize, usize),
     map: &[Vec<i32>],
@@ -128,12 +128,12 @@ fn filter_available(
 ) -> Vec<(usize, usize)> {
     compares
         .iter()
-        .filter(|&&c| available(point, (c.0, c.1), map, visited))
+        .filter(|&&c| _available(point, (c.0, c.1), map, visited))
         .copied()
         .collect::<Vec<(usize, usize)>>()
 }
 
-fn available(
+fn _available(
     point: (usize, usize),
     compare: (usize, usize),
     map: &[Vec<i32>],
@@ -151,13 +151,13 @@ mod tests {
     extern crate aoc_common;
     use self::aoc_common::get_test_input;
 
-    use crate::scratch::{elevations, find_paths, find_position_of};
+    use crate::scratch::{elevations, _find_paths, find_position_of};
 
     const TEST_FILE: &str = "inputs/test_input.txt";
     const _TEST_FILE_SMALL: &str = "inputs/test_input_small.txt";
 
     #[test]
-    fn can_read_input() {
+    fn _can_read_input() {
         let elevation_map = get_test_input(TEST_FILE, elevations);
 
         assert!(elevation_map.len() == 5);
@@ -176,12 +176,12 @@ mod tests {
     }
 
     #[test]
-    fn can_find_paths() {
+    fn _can_find_paths() {
         let elevation_map = get_test_input(TEST_FILE, elevations);
         let start = find_position_of(&elevation_map, 0);
         let end = find_position_of(&elevation_map, 27);
 
-        let paths = find_paths(start, &elevation_map, &[]);
+        let paths = _find_paths(start, &elevation_map, &[]);
         let mut paths = paths
             .iter()
             .filter(|p| *p.last().unwrap() == end)

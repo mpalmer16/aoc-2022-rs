@@ -1,15 +1,22 @@
 mod cell;
 mod grid_coord;
 
-use std::fmt;
+use std::{fmt, collections::{HashMap, HashSet}};
 
 use self::{cell::Cell, grid_coord::GridCoord};
+
+struct CellRecord {
+    _prev: Option<GridCoord>,
+}
 
 
 pub struct Grid {
     width: usize,
     height: usize,
     data: Vec<Cell>,
+    _visited: HashMap<GridCoord, CellRecord>,
+    _current: HashSet<GridCoord>,
+    _num_steps: usize
 }
 
 impl Grid {
@@ -24,7 +31,7 @@ impl Grid {
                 'E' => Cell::End,
                 'a'..='z' => Cell::Square(c as u8 - b'a'),
                 '\r' | '\n' => continue,
-                _ => panic!("invalid character: {c}"),
+                _ => panic!("invalid character: {}", c),
             };
             data.push(cell);
         }
@@ -32,6 +39,9 @@ impl Grid {
             width,
             height,
             data,
+            _current: Default::default(),
+            _visited: Default::default(),
+            _num_steps: 0
         }
     }
 
@@ -46,7 +56,7 @@ impl Grid {
         Some(&self.data[coord.y * self.width + coord.x])
     }
 
-    pub fn cell_mut(&mut self, coord: GridCoord) -> Option<&mut Cell> {
+    pub fn _cell_mut(&mut self, coord: GridCoord) -> Option<&mut Cell> {
         if !self.in_bounds(coord) {
             return None;
         }
@@ -54,7 +64,7 @@ impl Grid {
     }
 
     
-    // fn walkable_neighbors(&self, coord: GridCoord) -> impl Iterator<Item = GridCoord> + '_ {
+    // fn _walkable_neighbors(&self, coord: GridCoord) -> impl Iterator<Item = GridCoord> + '_ {
     //     let curr_elev = self.cell(coord).unwrap().elevation();
     //     let deltas: [(isize, isize); 4] = [(-1, 0), (1, 0), (0, -1), (0, 1)];
     //     deltas.into_iter().filter_map(move |(dx, dy)| {
@@ -69,6 +79,22 @@ impl Grid {
     //         other_elev <= curr_elev + 1
     //     })
     // }
+
+    fn _step (&mut self) {
+        if self._current.is_empty() {
+            let mut _start_coord: Option<GridCoord> = None;
+            for y in 0..self.height {
+                for x in 0..self.width {
+                    let coord: GridCoord = (x,y).into();
+                    if let Cell::Start = self.cell(coord).unwrap() {
+                        _start_coord = Some(coord);
+                        break;
+                    }
+                }
+            }
+            let _start_coord = _start_coord.unwrap();
+        }
+    }
 }
 
 impl fmt::Debug for Grid {

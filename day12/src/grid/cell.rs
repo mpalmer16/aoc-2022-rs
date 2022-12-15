@@ -7,7 +7,7 @@ pub enum Cell {
 }
 
 impl Cell {
-    pub fn elevation(self) -> u8 {
+    pub fn _elevation(self) -> u8 {
         match self {
             Cell::Start => 0,
             Cell::End => 25,
