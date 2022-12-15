@@ -34,4 +34,10 @@ git-status:
 alias gcp := git-commit-and-push
 # git commit with message and push to remote branch
 git-commit-and-push message:
+  git add .
   git commit -am '{{message}}'
+
+export CURRENT_BRANCH :=
+
+git-test:
+  current := git branch --show-current
