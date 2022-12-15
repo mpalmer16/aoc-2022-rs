@@ -151,14 +151,14 @@ mod tests {
     extern crate aoc_common;
     use self::aoc_common::get_test_input;
 
-    use crate::scratch::{elevations, _find_paths, find_position_of};
+    use crate::scratch::{_elevations, _find_paths, _find_position_of};
 
     const TEST_FILE: &str = "inputs/test_input.txt";
     const _TEST_FILE_SMALL: &str = "inputs/test_input_small.txt";
 
     #[test]
     fn _can_read_input() {
-        let elevation_map = get_test_input(TEST_FILE, elevations);
+        let elevation_map = get_test_input(TEST_FILE, _elevations);
 
         assert!(elevation_map.len() == 5);
         assert!(elevation_map[0].len() == 8);
@@ -177,9 +177,9 @@ mod tests {
 
     #[test]
     fn _can_find_paths() {
-        let elevation_map = get_test_input(TEST_FILE, elevations);
-        let start = find_position_of(&elevation_map, 0);
-        let end = find_position_of(&elevation_map, 27);
+        let elevation_map = get_test_input(TEST_FILE, _elevations);
+        let start = _find_position_of(&elevation_map, 0);
+        let end = _find_position_of(&elevation_map, 27);
 
         let paths = _find_paths(start, &elevation_map, &[]);
         let mut paths = paths
