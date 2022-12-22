@@ -8,7 +8,7 @@ use std::{
 /// [this](https://github.com/NickyMeuleman/scrapyard/blob/main/advent_of_code/2022/src/day_12.rs)
 /// very helpful code (used here)
 fn main() {
-    let input = include_str!("../inputs/day_12.txt");
+    let input = include_str!("../inputs/test_input.txt");
     let data = Grid::new(input.to_string()).unwrap();
 
     println!("answer 1: {}", data.start_to_end());
