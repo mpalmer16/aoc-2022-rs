@@ -1,7 +1,7 @@
 use aoc_common::fetch_with_transform;
 
-use crate::RPS::{Paper, Rock, Scissors};
-use crate::WLD::{Draw, Lose, Win};
+use crate::Rps::{Paper, Rock, Scissors};
+use crate::Wld::{Draw, Lose, Win};
 
 fn main() {
     let transform = |s: String| {
@@ -9,9 +9,9 @@ fn main() {
             .map(|s| s.split(' ').collect::<Vec<&str>>())
             .map(|cs| {
                 assert!(cs.len() == 2);
-                (RPS::read(cs[0]), RPS::read(cs[1]))
+                (Rps::read(cs[0]), Rps::read(cs[1]))
             })
-            .collect::<Vec<(RPS, RPS)>>()
+            .collect::<Vec<(Rps, Rps)>>()
     };
 
     let score = fetch_with_transform(2, transform)
@@ -26,9 +26,9 @@ fn main() {
             .map(|s| s.split(' ').collect::<Vec<&str>>())
             .map(|cs| {
                 assert!(cs.len() == 2);
-                (RPS::read(cs[0]), WLD::read(cs[1]))
+                (Rps::read(cs[0]), Wld::read(cs[1]))
             })
-            .collect::<Vec<(RPS, WLD)>>()
+            .collect::<Vec<(Rps, Wld)>>()
     };
 
     let score = fetch_with_transform(2, transform)
@@ -40,7 +40,7 @@ fn main() {
     println!("answer 2: {}", score);
 }
 
-fn get_score_for_shape(round: &(RPS, RPS)) -> i32 {
+fn get_score_for_shape(round: &(Rps, Rps)) -> i32 {
     match round.1 {
         Rock => 1,
         Paper => 2,
@@ -48,7 +48,7 @@ fn get_score_for_shape(round: &(RPS, RPS)) -> i32 {
     }
 }
 
-fn get_score_for_outcome(round: &(RPS, RPS)) -> i32 {
+fn get_score_for_outcome(round: &(Rps, Rps)) -> i32 {
     match round {
         (Scissors, Rock) | (Paper, Scissors) | (Rock, Paper) => 6,
         (Rock, Rock) | (Paper, Paper) | (Scissors, Scissors) => 3,
@@ -56,18 +56,18 @@ fn get_score_for_outcome(round: &(RPS, RPS)) -> i32 {
     }
 }
 
-fn get_score(round: &(RPS, RPS)) -> i32 {
+fn get_score(round: &(Rps, Rps)) -> i32 {
     get_score_for_shape(round) + get_score_for_outcome(round)
 }
 
 #[derive(PartialEq, Clone, Copy)]
-enum RPS {
+enum Rps {
     Rock,
     Paper,
     Scissors,
 }
 
-impl RPS {
+impl Rps {
     fn read(c: &str) -> Self {
         match c {
             "A" | "X" => Rock,
@@ -79,13 +79,13 @@ impl RPS {
 }
 
 #[derive(PartialEq)]
-enum WLD {
+enum Wld {
     Win,
     Lose,
     Draw,
 }
 
-impl WLD {
+impl Wld {
     fn read(c: &str) -> Self {
         match c {
             "X" => Lose,
@@ -95,7 +95,7 @@ impl WLD {
         }
     }
 
-    fn convert(&self, other: &RPS) -> RPS {
+    fn convert(&self, other: &Rps) -> Rps {
         match self {
             Self::Lose => match other {
                 Rock => Scissors,
@@ -118,47 +118,47 @@ mod tests {
 
     use crate::{
         get_score,
-        RPS::{self, Paper, Rock, Scissors},
-        WLD::{self, Draw, Lose, Win},
+        Rps::{self, Paper, Rock, Scissors},
+        Wld::{self, Draw, Lose, Win},
     };
 
     const TEST_INPUT_FILE: &str = "inputs/test_input.txt";
 
-    fn test_transform_rps(s: String) -> Vec<(RPS, RPS)> {
+    fn test_transform_rps(s: String) -> Vec<(Rps, Rps)> {
         s.split('\n')
             .map(|s| s.split(' ').collect::<Vec<&str>>())
             .map(|cs| {
                 assert!(cs.len() == 2);
-                (RPS::read(cs[0]), RPS::read(cs[1]))
+                (Rps::read(cs[0]), Rps::read(cs[1]))
             })
-            .collect::<Vec<(RPS, RPS)>>()
+            .collect::<Vec<(Rps, Rps)>>()
     }
 
-    fn test_transform_wld(s: String) -> Vec<(RPS, WLD)> {
+    fn test_transform_wld(s: String) -> Vec<(Rps, Wld)> {
         s.split('\n')
             .map(|s| s.split(' ').collect::<Vec<&str>>())
             .map(|v| {
                 assert!(v.len() == 2);
-                (RPS::read(v[0]), WLD::read(v[1]))
+                (Rps::read(v[0]), Wld::read(v[1]))
             })
-            .collect::<Vec<(RPS, WLD)>>()
+            .collect::<Vec<(Rps, Wld)>>()
     }
 
     #[test]
     fn can_read_rps_input() {
-        let input: Vec<(RPS, RPS)> = get_test_input(TEST_INPUT_FILE, test_transform_rps);
+        let input: Vec<(Rps, Rps)> = get_test_input(TEST_INPUT_FILE, test_transform_rps);
         assert!(input == vec![(Rock, Paper), (Paper, Rock), (Scissors, Scissors)])
     }
 
     #[test]
     fn can_read_wld_input() {
-        let input: Vec<(RPS, WLD)> = get_test_input(TEST_INPUT_FILE, test_transform_wld);
+        let input: Vec<(Rps, Wld)> = get_test_input(TEST_INPUT_FILE, test_transform_wld);
         assert!(input == vec![(Rock, Draw), (Paper, Lose), (Scissors, Win)]);
     }
 
     #[test]
     fn can_get_scores() {
-        let input: Vec<(RPS, RPS)> = get_test_input(TEST_INPUT_FILE, test_transform_rps);
+        let input: Vec<(Rps, Rps)> = get_test_input(TEST_INPUT_FILE, test_transform_rps);
         let scores = input.iter().map(get_score).collect::<Vec<i32>>();
 
         assert!(scores == vec![8, 1, 6]);
@@ -167,7 +167,7 @@ mod tests {
 
     #[test]
     fn can_decrypt_rounds_with_wld_to_rps() {
-        let input: Vec<(RPS, WLD)> = get_test_input(TEST_INPUT_FILE, test_transform_wld);
+        let input: Vec<(Rps, Wld)> = get_test_input(TEST_INPUT_FILE, test_transform_wld);
 
         let scores = input
             .iter()
